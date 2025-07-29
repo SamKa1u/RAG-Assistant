@@ -1,0 +1,35 @@
+[server]
+enableStaticServing = true
+
+[theme]
+base = "light"
+primaryColor = "#0071E3"
+backgroundColor = "#F8F8F8"
+secondaryBackgroundColor = "#F0F0F0"
+textColor = "#1C1C1E"
+linkColor = "#0071E3"
+linkUnderline = false
+codeBackgroundColor = "#F2F2F7"
+font = "sans-serif"
+fontFaces = []
+baseFontSize = 16
+baseFontWeight = 400
+headingFont = "sans-serif"
+headingFontSizes = ["3rem", "2.5rem", "2rem", "1.625rem", "1.375rem", "1.125rem"]
+headingFontWeights = 700
+codeFont = "monospace"
+codeFontSize = "0.875rem"
+codeFontWeight = 400
+baseRadius = "medium"
+buttonRadius = "medium"
+borderColor = "#E0E0E0"
+dataframeBorderColor = "#D1D1D6"
+dataframeHeaderBackgroundColor = "#E8E8EA"
+showWidgetBorder = true
+showSidebarBorder = false
+chartCategoricalColors = ["#0071E3", "#50C878", "#FF69B4", "#FFA500", "#6A5ACD", "#FF6347", "#4682B4", "#3CB371", "#FFD700", "#A9A9A9"]
+chartSequentialColors = ["#E0F4FF", "#CCE0FF", "#B3CBFF", "#99B7FF", "#80A3FF", "#668FFF", "#4D7BFF", "#3366FF", "#1A52FF", "#003DA5"]
+
+[[theme.fontFaces]]
+family = "SF Pro Display"
+url = "app/static/SFProDisplay.woff"
