@@ -1,7 +1,8 @@
 import os
 import streamlit as st
-from config import PINECONE_API_KEY, NEBIUS_API_KEY
-
+from config import PINECONE_API_KEY, NEBIUS_API_KEY, SYSTEM_PROMPT, INDEX_NAME
+import traceback
+import sys
 # pdf ingestion and recall
 from sentence_transformers import SentenceTransformer
 from pinecone import Pinecone, ServerlessSpec
@@ -20,10 +21,6 @@ from langgraph.graph import StateGraph
 from langchain_core.messages import HumanMessage, ToolMessage
 from langgraph.graph import START, END
 from graph import *
-from IPython.display import Image
-
-
-
 
 # initialize pinecone database for string vector embeddings
 pc = Pinecone(api_key=PINECONE_API_KEY)
@@ -92,7 +89,6 @@ def query_rag_system(query_text):
     :return: AI-generated response
     """
     MSGS = SYSTEM_PROMPT
-    # st.markdown(MSGS)
     query_embedding = get_embedding(query_text)
     q_embedding = query_embedding.tolist()
     # st.markdown(q_embedding)
@@ -129,10 +125,51 @@ def query_rag_system(query_text):
 
 
 with st.sidebar:
-    st.title("RAG Assistant")
+    st.title("RAG Study Assistant")
     st.subheader("", divider=True)
-    choice = st.radio("Navigation",["Upload","Chat","Generate Study Guide"])
+    choice = st.radio("Navigation",["Upsert","Chat","Generate Study Guide"],key="navigation")
     st.markdown("This app allows you to update an LLMs context with your pdf files for better quality responses.")
+
+    if choice == "Generate Study Guide":
+        graph_sucess = False
+        st.subheader("Study Guide Generator Graph", divider=True)
+        # ------ building nodes
+        try:
+            # query generator and call
+            graph_builder.add_edge(START, "query_generator_and_call")
+            graph_builder.add_node("query_generator_and_call", query_generator_and_call)
+            # study guide generator
+            graph_builder.add_node("study_guide_generator", study_guide_generator)
+            # feedback bot
+            graph_builder.add_node("feedback_bot", feedback_bot)
+
+            # ------ building edges
+            # wire query generator to the study guide
+            graph_builder.add_edge("query_generator_and_call", "study_guide_generator")
+
+            # wire study guide to feedback bot
+            graph_builder.add_edge("study_guide_generator", "feedback_bot")
+
+            # ------ building conditional edges
+            # wire feedback bot to study guide generator,and feedback bot to the query call.
+            graph_builder.add_conditional_edges(
+                "feedback_bot",
+                feedback_iteration,
+                {
+                    "end": END,
+                    "rewrite": "study_guide_generator",
+                    "more_context": "query_generator_and_call",
+                },
+            )
+        except Exception as e:
+            st.info(e)
+
+        try:
+            graph = graph_builder.compile()
+            st.image(graph.get_graph().draw_mermaid_png(max_retries=5))
+            graph_success = True
+        except Exception as e:
+            st.error(e)
 
 if choice == "Upsert":
     st.title("Upsert to DB :brain:")
@@ -168,44 +205,48 @@ if choice == "Chat":
 
 if choice == "Generate Study Guide":
     st.title("Generate Study Guide :memo:"+":books:")
-    with st.sidebar:
-        st.subheader("Study Guide Generator Graph", divider=True)
-# ------ building nodes
-        try:
-            # query generator and call
-            graph_builder.add_edge(START, "query_generator_and_call")
-            st.write(graph_builder.add_node("query_generator_and_call", query_generator_and_call))
-            # study guide generator
-            graph_builder.add_node("study_guide_generator", study_guide_generator)
-            # feedback bot
-            graph_builder.add_node("feedback_bot", feedback_bot)
+    if graph_success:
+        if query := st.chat_input("What would you like to generate a study guide for?"):
+            # display user message
+            st.chat_message("user").markdown(query)
 
-# ------ building edges
-            # wire query generator to the study guide
-            graph_builder.add_edge("query_generator_and_call", "study_guide_generator")
+            msg = HumanMessage(content=query)
+            try:
+                state = graph.invoke({"messages": [msg]})
+            except Exception as e:
+                exc_type, exc_value, tb = sys.exc_info()
+                st.write("Exception Type:", exc_type.__name__)
+                st.write("Exception Value:", exc_value)
 
-            # wire study guide to feedback bot
-            graph_builder.add_edge("study_guide_generator", "feedback_bot")
+                # Print the full traceback
+                traceback.print_tb(tb)
 
-            # ------ building conditional edges
-            # wire feedback bot to study guide generator,and feedback bot to the query call.
-            graph_builder.add_conditional_edges(
-                "feedback_bot",
-                feedback_iteration,
-                {
-                    "end": END,
-                    "rewrite": "study_guide_generator",
-                    "more_context": "query_generator_and_call",
-                },
-            )
-        except Exception as e:
-            st.info(e)
+            # pretty print the state, get snapshot of output
 
-        try:
-            graph = graph_builder.compile()
-            st.image(graph.get_graph().draw_mermaid_png(max_retries=5))
-        except Exception as e:
-            st.error(e)
-
+            # st.write(print("Final output:"))
+            #
+            # st.write(print("\n=== Original Query ==="))
+            # st.write(print(state.get("original_query", "No original query found.")))
+            #
+            # st.write(print("\n=== Study Guide ==="))
+            # resulting_study_guide = state.get("study_guide", "")
+            #
+            # for sg in resulting_study_guide.study_guide:
+            #     st.write(print(f"\n=== Study Guide ==="))
+            #     st.write(print(sg))
+            #
+            # st.write(print("\n=== Retrieved Context ==="))
+            # st.write(print(state.get("retrieved_context", "No context retrieved.")))
+            #
+            # st.write(print("\n=== Grade ==="))
+            # st.write(print(state.get("grade", "No grade assigned.")))
+            #
+            # st.write(print("\n=== Feedback ==="))
+            # st.write(print(state.get("feedback", "No feedback provided.")))
+            #
+            # st.write(print("\n=== Number of Iterations ==="))
+            # st.write(print(state.get("num_iterations", "No iterations counted.")))
+    else:
+        st.error("graph could not be generated")
 
 
