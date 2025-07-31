@@ -1,6 +1,6 @@
 # RAG Study Assistant
 
-  A retrieval-augmented generation powered chatbot providing specialization in a user's chosen documents.
+  A retrieval-augmented generation powered chatbot providing expertise in a user's chosen documents.
 
 ## Description
 
