@@ -1,9 +1,9 @@
 # RAG Study Assistant
 
-  A retrieval-augmented generation powered chatbot providing expertise in a user's chosen documents.
+  retrieval-augmented generation powered study chatbot providing expertise in a user's chosen documents.
 
 ## Description
-
+  A streamlit app allowing users to process study materials like pdf documents to a pinecone vector database providing an LLM with updated context to aid in generation of relevant, factual, and specific educational responses. It's also capable of generating study guides.
 ### Dependencies
 
 * streamlit
@@ -15,15 +15,8 @@
 * langchain_core
 * langchain_nebius
 
-### Executing program
-
-#### Clone the repo from cmd line in a project directory of your choosing
-```
-git clone https://github.com/
-```
 
 ## Author
-
 
 Samuel Kalu
   
@@ -32,5 +25,11 @@ Samuel Kalu
 
 
 ## Inspiration, code snippets, etc.
-#### W
-* [](https://www.waveshare.com/wiki/General_Driver_for_Robots)
+* [Medium RAG article](https://medium.com/@crimsonsyrus000/building-a-retrieval-augmented-generation-rag-chatbot-with-python-bf324335e335)  
+* [Chonkie](https://docs.chonkie.ai/api-reference/recursive-chunker)
+* [r/RAG](https://www.reddit.com/r/Rag/comments/1ls6e3r/whats_the_best_rag_tech_stack_these_days_from/)
+* [Openai Community](https://community.openai.com/t/prompt-engineering-for-rag/621495/3)
+#### Langchain Docs
+* [Func Calling](https://python.langchain.com/docs/how_to/function_calling/)
+* [Nebius](https://python.langchain.com/docs/integrations/chat/nebius/)
+
