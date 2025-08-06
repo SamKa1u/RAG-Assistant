@@ -1,6 +1,6 @@
 # RAG Study Assistant
 
-  retrieval-augmented generation powered study chatbot providing expertise in a user's chosen documents.
+An app for a RAG chatbot providing expertise in a user's chosen documents and the generation of study guides.
 
 ## Description
   A streamlit app allowing users to process study materials like pdf documents to a pinecone vector database providing an LLM with updated context to aid in generation of relevant, factual, and specific educational responses. It's also capable of generating study guides.
